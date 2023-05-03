@@ -1,0 +1,48 @@
+// test/escrow-test.js
+
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+describe("Escrow", function () {
+  let Escrow, escrow, owner, buyer, seller, other;
+
+  beforeEach(async () => {
+    // Deploy the Escrow smart contract
+    Escrow = await ethers.getContractFactory("Escrow");
+    [owner, buyer, seller, other] = await ethers.getSigners();
+    escrow = await Escrow.deploy(seller.address, { value: ethers.utils.parseEther("1") });
+    await escrow.deployed();
+  });
+
+  describe("Deployment", () => {
+    it("Should set the correct seller", async () => {
+      expect(await escrow.seller()).to.equal(seller.address);
+    });
+
+    it("Should set the correct deposit amount", async () => {
+      expect(await escrow.deposit()).to.equal(ethers.utils.parseEther("1"));
+    });
+
+    // Add more tests for the deployment of the Escrow contract
+  });
+
+  describe("Transactions", () => {
+    it("Should allow buyer to confirm and release funds", async () => {
+      // Buyer confirms the transaction
+      await escrow.connect(buyer).confirmTransaction({ value: ethers.utils.parseEther("1") });
+
+      // Check if the transaction is confirmed
+      expect(await escrow.confirmed()).to.equal(true);
+
+      // Buyer releases funds to the seller
+      await escrow.connect(buyer).releaseFunds();
+
+      // Check if the funds are released
+      expect(await escrow.released()).to.equal(true);
+    });
+
+    // Add more tests for different transaction scenarios
+  });
+
+  // Add more test suites as needed for other aspects of the Escrow contract
+});
